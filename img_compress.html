@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Compressor - Optimize Your Images Online</title>
+    <meta name="description" content="Free online image compressor with adjustable quality settings. Reduce image file sizes without losing quality. Supports JPEG, PNG, and WEBP formats.">
+    <meta name="keywords" content="image compressor, optimize images, reduce file size, online tool, JPEG compression, PNG optimization">
+    
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #4f46e5;
+            --background: #f8fafc;
+            --text-color: #1e293b;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--background);
+            color: var(--text-color);
+            line-height: 1.5;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .main-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .ad-section {
+            text-align: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .upload-section {
+            border: 2px dashed #cbd5e1;
+            border-radius: 0.75rem;
+            padding: 3rem 1rem;
+            text-align: center;
+            transition: border-color 0.3s ease;
+            background: #f1f5f9;
+            cursor: pointer;
+        }
+
+        .upload-section.dragover {
+            border-color: var(--primary-color);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+        }
+
+        .quality-control {
+            flex: 1;
+            min-width: 300px;
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .output-card {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            display: none;
+        }
+
+        .file-info {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .file-stat {
+            text-align: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 0.5rem;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: none;
+            place-items: center;
+            z-index: 1000;
+        }
+
+        .spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 4px solid #e2e8f0;
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-color);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes slideUp { from { bottom: -100px; } to { bottom: 2rem; } }
+
+        canvas {
+            max-width: 10000px;
+            max-height: 10000px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .file-info {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast"></div>
+
+    <!-- Header Ad -->
+    <div class="ad-section">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+             data-ad-slot="1234567890"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+    </div>
+
+    <div class="container">
+        <main class="main-card">
+            <h1 style="text-align: center; margin-bottom: 2rem;">
+                <i class="fas fa-image"></i> Image Compressor
+            </h1>
+
+            <div class="upload-section" id="dropZone">
+                <i class="fas fa-cloud-upload-alt fa-3x" style="color: var(--primary-color); margin-bottom: 1rem;"></i>
+                <h3>Drag & Drop Images Here</h3>
+                <p>or click to browse files</p>
+                <input type="file" id="imageInput" accept="image/*" hidden>
+            </div>
+
+            <div class="controls">
+                <div class="quality-control">
+                    <label>Compression Level: <span id="qualityValue" class="stat-value">80</span>%</label>
+                    <input type="range" id="quality" min="1" max="100" value="80">
+                    <div style="display: flex; justify-content: space-between;">
+                        <small>Smaller File</small>
+                        <small>Better Quality</small>
+                    </div>
+                </div>
+                <button id="compressBtn">
+                    <i class="fas fa-compress-alt"></i> Compress Now
+                </button>
+            </div>
+
+            <div class="output-card" id="output">
+                <div class="file-info">
+                    <div class="file-stat">
+                        <div class="stat-value" id="originalSize">0 KB</div>
+                        <small>Original Size</small>
+                    </div>
+                    <div class="file-stat">
+                        <div class="stat-value" id="compressedSize">0 KB</div>
+                        <small>Compressed Size</small>
+                    </div>
+                    <div class="file-stat">
+                        <div class="stat-value" id="savings">0%</div>
+                        <small>Savings</small>
+                    </div>
+                </div>
+                <a id="downloadBtn" class="download-link" style="display: none;">
+                    <i class="fas fa-download"></i> Download Compressed Image
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <!-- Sidebar Ad -->
+    <div class="ad-section">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+             data-ad-slot="0987654321"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+    </div>
+
+    <script>
+        // DOM Elements
+        const imageInput = document.getElementById('imageInput');
+        const quality = document.getElementById('quality');
+        const qualityValue = document.getElementById('qualityValue');
+        const compressBtn = document.getElementById('compressBtn');
+        const dropZone = document.getElementById('dropZone');
+        const toast = document.querySelector('.toast');
+        const loadingOverlay = document.querySelector('.loading-overlay');
+        const originalSizeElem = document.getElementById('originalSize');
+        const compressedSizeElem = document.getElementById('compressedSize');
+        const savingsElem = document.getElementById('savings');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const outputCard = document.getElementById('output');
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Constants
+        const maxFileSize = 10 * 1024 * 1024; // 10MB
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        const maxResolution = 25_000_000; // 25MP
+
+        // Event Listeners
+        quality.addEventListener('input', () => {
+            qualityValue.textContent = quality.value;
+        });
+
+        compressBtn.addEventListener('click', handleCompression);
+        
+        // Drag & Drop Handling
+        dropZone.addEventListener('click', () => imageInput.click());
+        dropZone.addEventListener('dragover', handleDragOver);
+        dropZone.addEventListener('dragleave', handleDragLeave);
+        dropZone.addEventListener('drop', handleDrop);
+
+        // Initialize AdSense
+        (adsbygoogle = window.adsbygoogle || []).push({});
+
+        async function handleCompression() {
+            try {
+                if (!imageInput.files[0]) {
+                    showToast('Please select an image first!');
+                    return;
+                }
+
+                const file = imageInput.files[0];
+                
+                // Validate file
+                if (!allowedTypes.includes(file.type)) {
+                    showToast('Unsupported file format! Supported: JPEG, PNG, WEBP');
+                    return;
+                }
+
+                if (file.size > maxFileSize) {
+                    showToast('File size exceeds 10MB limit!');
+                    return;
+                }
+
+                showLoading(true);
+                
+                // Load image
+                const img = await createImageBitmap(file);
+                
+                // Validate resolution
+                if (img.width * img.height > maxResolution) {
+                    throw new Error('Image resolution too large (max 25MP)');
+                }
+
+                // Set canvas dimensions
+                canvas.width = img.width;
+                canvas.height = img.height;
+                
+                // Draw image
+                ctx.drawImage(img, 0, 0);
+                
+                // Convert to Blob
+                const format = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                const qualityValue = format === 'image/png' ? 
+                    Math.min(1, quality.value/100) : 
+                    quality.value/100;
+
+                const blob = await new Promise((resolve, reject) => {
+                    canvas.toBlob(
+                        blob => blob ? resolve(blob) : reject('Conversion failed'),
+                        format,
+                        qualityValue
+                    );
+                });
+
+                // Create download link
+                const url = URL.createObjectURL(blob);
+                downloadBtn.href = url;
+                downloadBtn.download = `compressed_${file.name.replace(/\.[^/.]+$/, '')}.${format.split('/')[1]}`;
+                downloadBtn.style.display = 'inline-block';
+                
+                // Update UI
+                outputCard.style.display = 'block';
+                originalSizeElem.textContent = `${(file.size/1024).toFixed(1)} KB`;
+                compressedSizeElem.textContent = `${(blob.size/1024).toFixed(1)} KB`;
+                savingsElem.textContent = `${((1 - blob.size/file.size)*100).toFixed(1)}%`;
+                
+                showToast('Compression successful!');
+            } catch (error) {
+                console.error('Error:', error);
+                showToast(error.message || 'Compression failed. Please try again.');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        }
+
+        function handleDragLeave() {
+            dropZone.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if(e.dataTransfer.files) imageInput.files = e.dataTransfer.files;
+        }
+
+        function showLoading(show) {
+            loadingOverlay.style.display = show ? 'grid' : 'none';
+        }
+
+        function showToast(message, duration=3000) {
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', duration);
+        }
+    </script>
+</body>
+</html>
